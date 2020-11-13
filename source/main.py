@@ -18,12 +18,14 @@ while cap.isOpened():
         print("Exiting ...")
         break
 
-
+    
+    """
     pre = findPlate.preprocess(frame)
     cnr = findPlate.extract_contours(pre)
     cnr = findPlate.filter(cnr)
     frame = cv.drawContours(frame, cnr, -1, (0, 0, 255), 3)
 
+    
     # out.write(frame) # write to file
     cv.imshow('frame', frame)
     if cv.waitKey(1) == ord('q'):
@@ -36,9 +38,7 @@ while cap.isOpened():
         if c[0] is not None:
             if c[0].any():
                 cv.imwrite('../images/'+str(id(c[0]))+'.png', c[0])
-    """
     
-
 
 
 # Release everything if job is finished
