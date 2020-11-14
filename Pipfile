@@ -8,6 +8,7 @@ numpy = "==1.19.3"
 opencv-python = "*"
 matplotlib = "*"
 imutils = "*"
+scikit-image = "*"
 
 [dev-packages]
 pylint = "*"
