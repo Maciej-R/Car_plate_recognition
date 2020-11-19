@@ -9,6 +9,8 @@ opencv-python = "*"
 matplotlib = "*"
 imutils = "*"
 scikit-image = "*"
+pyside2 = "*"
+pyqt5 = "*"
 
 [dev-packages]
 pylint = "*"
