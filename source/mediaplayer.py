@@ -3,8 +3,8 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 from PyQt5.QtMultimedia import *
 from PyQt5.QtMultimediaWidgets import *
+from source.MainWindow2 import UI_MainWindow
 
-from MainWindow import Ui_MainWindow
 
 def hhmmss(ms):
     # s = 1000
@@ -14,6 +14,7 @@ def hhmmss(ms):
     m, r = divmod(r, 60000)
     s, _ = divmod(r, 1000)
     return ("%d:%02d:%02d" % (h,m,s)) if h else ("%d:%02d" % (m,s))
+
 
 class ViewerWindow(QMainWindow):
     state = pyqtSignal(bool)
@@ -37,7 +38,7 @@ class PlaylistModel(QAbstractListModel):
         return self.playlist.mediaCount()
 
 
-class MainWindow(QMainWindow, Ui_MainWindow):
+class MainWindow(QMainWindow, UI_MainWindow):
     def __init__(self, *args, **kwargs):
         super(MainWindow, self).__init__(*args, **kwargs)
         self.setupUi(self)
@@ -86,6 +87,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         self.setAcceptDrops(True)
 
+        self.pushButton_4.clicked.connect(self.open_file)
+
         self.show()
 
     def dragEnterEvent(self, e):
@@ -93,10 +96,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             e.acceptProposedAction()
 
     def dropEvent(self, e):
+
         for url in e.mimeData().urls():
-            self.playlist.addMedia(
-                QMediaContent(url)
-            )
+
+            self.playlist.addMedia(QMediaContent(url))
 
         self.model.layoutChanged.emit()
 
@@ -107,13 +110,22 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.player.play()
 
     def open_file(self):
-        path, _ = QFileDialog.getOpenFileName(self, "Open file", "", "mp3 Audio (*.mp3);mp4 Video (*.mp4);Movie files (*.mov);All files (*.*)")
+
+        dlg = QFileDialog()
+        dlg.setFileMode(QFileDialog.AnyFile)
+        dlg.setNameFilters(["Movies (*.mp4)"])
+        dlg.selectNameFilter("Movies (*.mp4)")
+
+        path = None
+
+        if dlg.exec_():
+            path = dlg.selectedFiles()
 
         if path:
+
+            path = path[0]
             self.playlist.addMedia(
-                QMediaContent(
-                    QUrl.fromLocalFile(path)
-                )
+                QMediaContent(QUrl.fromLocalFile(path))
             )
 
         self.model.layoutChanged.emit()
@@ -153,6 +165,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.viewer.hide()
 
     def erroralert(self, *args):
+        print("Error")
         print(args)
 
 

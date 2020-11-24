@@ -11,8 +11,11 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
 
 
-class Ui_MainWindow(object):
+class UI_MainWindow(object):
+
     def setupUi(self, MainWindow):
+        """"""
+
         MainWindow.setObjectName("MainWindow")
         MainWindow.resize(598, 412)
         self.centralWidget = QtWidgets.QWidget(MainWindow)
@@ -149,10 +152,10 @@ class Ui_MainWindow(object):
         self.menuFIle.addAction(self.open_file_action)
         self.menuBar.addAction(self.menuFIle.menuAction())
 
-        self.retranslateUi(MainWindow)
+        self.retranslate_ui(MainWindow)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
-    def retranslateUi(self, MainWindow):
+    def retranslate_ui(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
         MainWindow.setWindowTitle(_translate("MainWindow", "Failamp"))
         self.currentTimeLabel.setText(_translate("MainWindow", "0:00"))

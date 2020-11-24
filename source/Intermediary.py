@@ -1,4 +1,4 @@
-from UI import UI
+from PyQt5.QtWidgets import QFileDialog
 
 
 class Intermediary:
@@ -9,7 +9,7 @@ class Intermediary:
     and then sorted, prepared and saved)
     """
 
-    def __init__(self, gui: UI):
+    def __init__(self): #, gui: UI):
         """
         Prepares required resources
         :arg gui: Reference to UI class that allows to send updates, interact with UI
@@ -40,3 +40,16 @@ class Intermediary:
 
         :return:
         """
+
+    def handle_open_file_dialog(self):
+
+        dlg = QFileDialog()
+        dlg.setFileMode(QFileDialog.AnyFile)
+        dlg.setNameFilters(["Movies (*.mp4)"])
+        dlg.selectNameFilter("Movies (*.mp4)")
+        
+        filenames = str()
+
+        if dlg.exec_():
+            filenames = dlg.selectedFiles()
+
