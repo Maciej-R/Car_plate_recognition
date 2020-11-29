@@ -9,6 +9,7 @@
 
 
 from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5.QtMultimediaWidgets import QVideoWidget
 
 
 class UI_MainWindow(object):
@@ -92,14 +93,14 @@ class UI_MainWindow(object):
         self.nextButton.setIcon(icon4)
         self.nextButton.setObjectName("nextButton")
         self.horizontalLayout_5.addWidget(self.nextButton)
-        self.viewButton = QtWidgets.QPushButton(self.gridLayoutWidget)
-        self.viewButton.setText("")
-        icon5 = QtGui.QIcon()
-        icon5.addPixmap(QtGui.QPixmap("images/application-image.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
-        self.viewButton.setIcon(icon5)
-        self.viewButton.setCheckable(True)
-        self.viewButton.setObjectName("viewButton")
-        self.horizontalLayout_5.addWidget(self.viewButton)
+        # self.viewButton = QtWidgets.QPushButton(self.gridLayoutWidget)
+        # self.viewButton.setText("")
+        # icon5 = QtGui.QIcon()
+        # icon5.addPixmap(QtGui.QPixmap("images/application-image.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        # self.viewButton.setIcon(icon5)
+        # self.viewButton.setCheckable(True)
+        # # self.viewButton.setObjectName("viewButton")
+        # self.horizontalLayout_5.addWidget(self.viewButton)
         spacerItem = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
         self.horizontalLayout_5.addItem(spacerItem)
         self.label = QtWidgets.QLabel(self.gridLayoutWidget)
@@ -128,15 +129,23 @@ class UI_MainWindow(object):
         self.pushButton_2.setObjectName("pushButton_2")
         self.verticalLayout_2.addWidget(self.pushButton_2)
         self.gridLayout.addLayout(self.verticalLayout_2, 1, 0, 2, 1)
-        self.playlistView = QtWidgets.QListView(self.gridLayoutWidget)
-        self.playlistView.setAcceptDrops(True)
-        self.playlistView.setProperty("showDropIndicator", True)
-        self.playlistView.setDragDropMode(QtWidgets.QAbstractItemView.DropOnly)
-        self.playlistView.setDefaultDropAction(QtCore.Qt.CopyAction)
-        self.playlistView.setAlternatingRowColors(True)
-        self.playlistView.setUniformItemSizes(True)
-        self.playlistView.setObjectName("playlistView")
-        self.gridLayout.addWidget(self.playlistView, 0, 1, 1, 1)
+
+        self.videoWidget = QVideoWidget()
+        self.gridLayout.addWidget(self.videoWidget, 0, 1, 1, 1)
+        # self.videoWidget.setAcceptDrops(True)
+        # self.videoWidget.setProperty("showDropIndicator", True)
+        # self.videoWidget.setDragDropMode(QtWidgets.QAbstractItemView.DropOnly)
+        #self.viewer.setCentralWidget(videoWidget)
+        # self.playlistView = QtWidgets.QListView(self.gridLayoutWidget)
+        # self.playlistView.setAcceptDrops(True)
+        # self.playlistView.setProperty("showDropIndicator", True)
+        # self.playlistView.setDragDropMode(QtWidgets.QAbstractItemView.DropOnly)
+        # self.playlistView.setDefaultDropAction(QtCore.Qt.CopyAction)
+        # self.playlistView.setAlternatingRowColors(True)
+        # self.playlistView.setUniformItemSizes(True)
+        # self.playlistView.setObjectName("playlistView")
+        # self.gridLayout.addWidget(self.playlistView, 0, 1, 1, 1)
+
         MainWindow.setCentralWidget(self.centralWidget)
         self.menuBar = QtWidgets.QMenuBar(MainWindow)
         self.menuBar.setGeometry(QtCore.QRect(0, 0, 598, 20))
@@ -157,7 +166,7 @@ class UI_MainWindow(object):
 
     def retranslate_ui(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
-        MainWindow.setWindowTitle(_translate("MainWindow", "Failamp"))
+        MainWindow.setWindowTitle(_translate("MainWindow", "Placeholder"))
         self.currentTimeLabel.setText(_translate("MainWindow", "0:00"))
         self.totalTimeLabel.setText(_translate("MainWindow", "0:00"))
         self.pushButton_4.setText(_translate("MainWindow", "Load file"))

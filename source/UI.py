@@ -1,10 +1,8 @@
 from PyQt5 import QtWidgets
-from source.Intermediary import Intermediary
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 from PyQt5.QtMultimedia import *
-from PyQt5.QtMultimediaWidgets import *
 from source.MainWindow2 import UI_MainWindow
 
 
@@ -45,9 +43,7 @@ class UI(QtWidgets.QMainWindow, UI_MainWindow):
         self.viewer.setWindowFlags(self.viewer.windowFlags() | Qt.WindowStaysOnTopHint)
         self.viewer.setMinimumSize(QSize(480,360))
 
-        videoWidget = QVideoWidget()
-        self.viewer.setCentralWidget(videoWidget)
-        self.player.setVideoOutput(videoWidget)
+        self.player.setVideoOutput(self.videoWidget)
 
         # Connect control buttons/slides for media player.
         self.playButton.pressed.connect(self.player.play)
@@ -55,17 +51,17 @@ class UI(QtWidgets.QMainWindow, UI_MainWindow):
         self.stopButton.pressed.connect(self.player.stop)
         self.volumeSlider.valueChanged.connect(self.player.setVolume)
 
-        self.viewButton.toggled.connect(self.toggle_viewer)
-        self.viewer.state.connect(self.viewButton.setChecked)
+        # self.viewButton.toggled.connect(self.toggle_viewer)
+        # self.viewer.state.connect(self.viewButton.setChecked)
 
         self.previousButton.pressed.connect(self.playlist.previous)
         self.nextButton.pressed.connect(self.playlist.next)
 
-        self.model = PlaylistModel(self.playlist)
-        self.playlistView.setModel(self.model)
-        self.playlist.currentIndexChanged.connect(self.playlist_position_changed)
-        selection_model = self.playlistView.selectionModel()
-        selection_model.selectionChanged.connect(self.playlist_selection_changed)
+        # self.model = PlaylistModel(self.playlist)
+        # self.playlistView.setModel(self.model)
+        # self.playlist.currentIndexChanged.connect(self.playlist_position_changed)
+        # selection_model = self.playlistView.selectionModel()
+        # selection_model.selectionChanged.connect(self.playlist_selection_changed)
 
         self.player.durationChanged.connect(self.update_duration)
         self.player.positionChanged.connect(self.update_position)
@@ -76,6 +72,8 @@ class UI(QtWidgets.QMainWindow, UI_MainWindow):
         self.setAcceptDrops(True)
 
         self.add_listeners()
+
+        self.file_loaded_handler = None
 
     def add_listeners(self) -> None:
         """
@@ -113,8 +111,8 @@ class UI(QtWidgets.QMainWindow, UI_MainWindow):
 
         dlg = QFileDialog()
         dlg.setFileMode(QFileDialog.AnyFile)
-        dlg.setNameFilters(["Movies (*.mp4)"])
-        dlg.selectNameFilter("Movies (*.mp4)")
+        dlg.setNameFilters(["Movies (*.avi)"])
+        dlg.selectNameFilter("Movies (*.avi)")
 
         path = None
 
@@ -127,8 +125,13 @@ class UI(QtWidgets.QMainWindow, UI_MainWindow):
             path = path[0]
             self.playlist.addMedia(QMediaContent(QUrl.fromLocalFile(path)))
             self.player.setMedia(QMediaContent(QUrl.fromLocalFile(path)))
+            print(self.file_loaded_handler)
+            try:
+                self.file_loaded_handler(path)
+            except Exception as e:
+                print(e)
 
-        self.model.layoutChanged.emit()
+        # self.model.layoutChanged.emit()
 
     def update_duration(self, duration):
         print("!", duration)
@@ -167,6 +170,10 @@ class UI(QtWidgets.QMainWindow, UI_MainWindow):
     def erroralert(self, *args):
         print("Error")
         print(args)
+
+    def set_file_loaded_hanlder(self, mthd):
+
+        self.file_loaded_handler = mthd
 
 
 def hhmmss(ms):

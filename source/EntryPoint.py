@@ -4,6 +4,7 @@ from PyQt5.QtWidgets import QApplication
 from source.UI import UI
 from PyQt5.QtGui import *
 from PyQt5.QtCore import *
+from source.Intermediary import Intermediary
 
 
 #app = QtWidgets.QApplication(sys.argv)
@@ -29,5 +30,6 @@ palette.setColor(QPalette.HighlightedText, Qt.black)
 app.setPalette(palette)
 app.setStyleSheet("QToolTip { color: #ffffff; background-color: #2a82da; border: 1px solid white; }")
 ui = UI()
+inter = Intermediary(ui)
 ui.show()
 app.exec_()

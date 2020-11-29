@@ -1,4 +1,7 @@
 from PyQt5.QtWidgets import QFileDialog
+from PyQt5.QtCore import pyqtSlot
+from source.UI import UI
+from source.SignalWrapper import *
 
 
 class Intermediary:
@@ -9,12 +12,12 @@ class Intermediary:
     and then sorted, prepared and saved)
     """
 
-    def __init__(self): #, gui: UI):
+    def __init__(self, gui: UI):
         """
         Prepares required resources
         :arg gui: Reference to UI class that allows to send updates, interact with UI
         """
-        pass
+        gui.set_file_loaded_hanlder(Intermediary.handle_file_loaded)
 
     def get_log_data(self, data):
         """
@@ -41,15 +44,23 @@ class Intermediary:
         :return:
         """
 
-    def handle_open_file_dialog(self):
+    @staticmethod
+    def handle_file_loaded(pth:str):
+        """
+        Handle called after path to analyzed file has been choosen in GUI
+        :param pth: Path to movie file
+        :type pth: str
+        :return: None
+        """
+        print("in")
 
-        dlg = QFileDialog()
-        dlg.setFileMode(QFileDialog.AnyFile)
-        dlg.setNameFilters(["Movies (*.mp4)"])
-        dlg.selectNameFilter("Movies (*.mp4)")
-        
-        filenames = str()
-
-        if dlg.exec_():
-            filenames = dlg.selectedFiles()
+        # dlg = QFileDialog()
+        # dlg.setFileMode(QFileDialog.AnyFile)
+        # dlg.setNameFilters(["Movies (*.mp4)"])
+        # dlg.selectNameFilter("Movies (*.mp4)")
+        #
+        # filenames = str()
+        #
+        # if dlg.exec_():
+        #     filenames = dlg.selectedFiles()
 
