@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "282d00a7b863e5ab2e9e542da669237d3a06e4fc05e897ca1d5743c5d92d5d16"
+            "sha256": "a34aeb5e20492e593e5779a087be7c9258578249cd596695982e1aa923862b93"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -287,6 +287,13 @@
             ],
             "markers": "python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3'",
             "version": "==2.8.1"
+        },
+        "pythonvideoconverter": {
+            "hashes": [
+                "sha256:d725feb77d7e42cbdd90bf3800111c1b98a32bb1b3e51283eead0f82b2320c59"
+            ],
+            "index": "pypi",
+            "version": "==1.0.3"
         },
         "pywavelets": {
             "hashes": [
