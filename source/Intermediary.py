@@ -17,7 +17,13 @@ class Intermediary:
         Prepares required resources
         :arg gui: Reference to UI class that allows to send updates, interact with UI
         """
+
+        Intermediary.gui = gui
+
         gui.set_file_loaded_hanlder(Intermediary.handle_file_loaded)
+        gui.set_get_report_handler(Intermediary.handle_get_report)
+
+        Intermediary.report = "That's a test"
 
     def get_log_data(self, data):
         """
@@ -54,13 +60,15 @@ class Intermediary:
         """
         print("in")
 
-        # dlg = QFileDialog()
-        # dlg.setFileMode(QFileDialog.AnyFile)
-        # dlg.setNameFilters(["Movies (*.mp4)"])
-        # dlg.selectNameFilter("Movies (*.mp4)")
-        #
-        # filenames = str()
-        #
-        # if dlg.exec_():
-        #     filenames = dlg.selectedFiles()
+    @staticmethod
+    def handle_get_report():
+        """
+        Provides report to UI
+        :return: True if report has been updated, False otherwise
+        """
 
+        updated = True
+        if updated:
+            Intermediary.gui.report = Intermediary.report
+            return True
+        return False
