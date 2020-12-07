@@ -25,7 +25,8 @@ class Intermediary:
         gui.set_file_loaded_hanlder(Intermediary.handle_file_loaded)
         gui.set_get_report_handler(Intermediary.handle_get_report)
 
-        Intermediary.report = "That's a test"
+        Intermediary.report = "Not ready"
+        Intermediary.started = False
 
     def get_log_data(self, data):
         """
@@ -55,6 +56,7 @@ class Intermediary:
         :return: None
         """
         Thread(target=process_video, args=(pth,)).start()
+        Intermediary.started = True
 
     @staticmethod
     def handle_get_report():
@@ -63,8 +65,11 @@ class Intermediary:
         :return: True if report has been updated, False otherwise
         """
 
-        updated = True
-        if updated:
+        if Intermediary.started:
+            if Intermediary.processor.is_alive():
+                return False
+            with open("../output/report.txt", "r") as f:
+                Intermediary.report = f.read()
             Intermediary.gui.report = Intermediary.report
             return True
         return False
