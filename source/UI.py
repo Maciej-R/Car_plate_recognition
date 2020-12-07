@@ -5,6 +5,7 @@ from PyQt5.QtCore import *
 from PyQt5.QtMultimedia import *
 from source.MainWindow3 import UI_MainWindow
 from source.ReportWindow import ReportWindow
+import re
 
 
 class UI(QtWidgets.QMainWindow, UI_MainWindow):
@@ -84,7 +85,8 @@ class UI(QtWidgets.QMainWindow, UI_MainWindow):
         # Get file to new video and load it
         for url in e.mimeData().urls():
             try:
-                self.player.setMedia(QMediaContent(url))
+                if re.search(".*\.avi", url.toLocalFile()):
+                    self.player.setMedia(QMediaContent(url))
                 self.file_loaded_handler(url.toLocalFile())
             except Exception as e:
                 print(e)
@@ -99,7 +101,7 @@ class UI(QtWidgets.QMainWindow, UI_MainWindow):
     def load_file(self):
         """Show file choosing dialog, if user had chosen file than get path and call appropriate handler"""
 
-        path = self.show_file_choose_dialog("Movies (*.avi)")
+        path = self.show_file_choose_dialog("")
 
         # Process choice, if one was made
         if path:

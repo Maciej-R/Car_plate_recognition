@@ -2,6 +2,7 @@ from PyQt5.QtWidgets import QFileDialog
 from PyQt5.QtCore import pyqtSlot
 from source.UI import UI
 from source.SignalWrapper import *
+from source.plates import process_video
 
 
 class Intermediary:
@@ -58,7 +59,7 @@ class Intermediary:
         :type pth: str
         :return: None
         """
-        print("in")
+        process_video(pth)
 
     @staticmethod
     def handle_get_report():
