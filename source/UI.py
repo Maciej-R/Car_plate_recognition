@@ -186,6 +186,7 @@ class UI(QtWidgets.QMainWindow, UI_MainWindow):
         """
 
         if pth:
+            print(pth)
             self.player.setMedia(QMediaContent(QUrl.fromLocalFile(pth)))
             # Shows first frame so that change will be noticeable
             self.player.pause()

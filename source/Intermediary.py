@@ -4,6 +4,8 @@ from source.UI import UI
 from source.SignalWrapper import *
 from source.plates import process_video
 from threading import Thread
+import re
+from os import getcwd
 
 
 class Intermediary:
@@ -21,27 +23,13 @@ class Intermediary:
         """
 
         Intermediary.gui = gui
+        Intermediary.pth = None
 
         gui.set_file_loaded_hanlder(Intermediary.handle_file_loaded)
         gui.set_get_report_handler(Intermediary.handle_get_report)
 
         Intermediary.report = "Not ready"
         Intermediary.started = False
-
-    def get_log_data(self, data):
-        """
-        Receives log data, stores it
-        :param data:
-        :return:
-        """
-
-    def log(self, data):
-        """
-        After end of file processing prepares and saves log file
-        :param data:
-        :return:
-        """
-        pass
 
     #________________________ Handlers ________________________
     # Section of handlers for GUI events
@@ -55,8 +43,10 @@ class Intermediary:
         :type pth: str
         :return: None
         """
+        Intermediary.pth = pth
         Intermediary.found = {}
-        Intermediary.processor = Thread(target=process_video, args=(pth,Intermediary.found))
+        Intermediary.processor = CallbackThread(Intermediary.signal_done, target=process_video,
+                                                args=(pth, Intermediary.found))
         Intermediary.processor.start()
         Intermediary.started = True
 
@@ -70,8 +60,26 @@ class Intermediary:
         if Intermediary.started:
             if Intermediary.processor.is_alive():
                 return False
+            Intermediary.started = False
             with open("output/report.txt", "r") as f:
                 Intermediary.report = f.read()
             Intermediary.gui.report = Intermediary.report
             return True
         return False
+
+    @staticmethod
+    def signal_done():
+        pattern = re.compile("/\w*\..*$") # Filename
+        res = pattern.search(Intermediary.pth).group(0)
+        Intermediary.gui.signal_done(getcwd() + "/output" + re.sub("\.*$", ".avi", res))
+
+
+class CallbackThread(Thread):
+
+    def __init__(self, callback, **kwargs):
+        Thread.__init__(self, **kwargs)
+        self.callback = callback
+
+    def run(self):
+        super().run()
+        self.callback()
