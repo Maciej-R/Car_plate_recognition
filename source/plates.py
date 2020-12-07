@@ -1,7 +1,9 @@
 import sys
+import os
+
 import numpy as np
 import cv2
-import os
+
 from source.openalpr import Alpr
 
 def generate_mask(width,height):
@@ -9,7 +11,12 @@ def generate_mask(width,height):
     mask[height//2:,:] = [255, 255, 255]
     cv2.imwrite('mask.jpg', mask)
 
-def process_video(video_path):
+def process_video(video_path, found):
+    """
+    Function for detecting license plates from video
+    :video_path: path to input video
+    :return: dictionary, key=license plate number, value=license plate image
+    """
     filename = os.path.basename(video_path).split(sep='.')[0]
     cap = cv2.VideoCapture(video_path)
     if not cap.isOpened():
@@ -31,19 +38,16 @@ def process_video(video_path):
     alpr.set_top_n(1)
     alpr.set_default_region('pl')
 
-    file = open(f'output/report.txt','w')
+    file = open('output/report.txt','w')
 
     cnt = 0
-    found = set()
 
     while cap.isOpened():
         ret_val, frame = cap.read()
         if not ret_val:
-            print('Exiting...')
             break
 
         cnt += 1
-        print(cnt)
 
         _, enc = cv2.imencode("*.jpg", frame)
         results = alpr.recognize_array(enc.tobytes())
@@ -51,15 +55,17 @@ def process_video(video_path):
         if results['results']:
             for plate in results['results']:
                 file.write('Frame: {:5} | Plate: {:8}\n'.format(cnt, plate['plate']))
-                found.add(plate['plate'])
+                if plate['plate'] not in found:
+                    found[plate['plate']] = frame.copy()[plate["coordinates"][0]["y"]:plate["coordinates"][2]["y"],
+                        plate["coordinates"][0]["x"]:plate["coordinates"][2]["x"]]
                 cv2.rectangle(frame, (plate["coordinates"][0]["x"],plate["coordinates"][0]["y"]),
                     (plate["coordinates"][2]["x"],plate["coordinates"][2]["y"]), (0,255,0), 3)
+
 
         writer.write(frame)
 
     file.close()
     writer.release()
     cap.release()
-    #alpr.unload()
 
     return found

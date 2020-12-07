@@ -55,7 +55,8 @@ class Intermediary:
         :type pth: str
         :return: None
         """
-        Intermediary.processor = Thread(target=process_video, args=(pth,))
+        Intermediary.found = {}
+        Intermediary.processor = Thread(target=process_video, args=(pth,Intermediary.found))
         Intermediary.processor.start()
         Intermediary.started = True
 
