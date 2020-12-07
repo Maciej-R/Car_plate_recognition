@@ -31,7 +31,7 @@ def process_video(video_path):
     alpr.set_top_n(1)
     alpr.set_default_region('pl')
 
-    file = open(f'output/{filename}.txt','w')
+    file = open(f'output/report.txt','w')
 
     cnt = 0
     found = set()
@@ -43,6 +43,7 @@ def process_video(video_path):
             break
 
         cnt += 1
+        print(cnt)
 
         _, enc = cv2.imencode("*.jpg", frame)
         results = alpr.recognize_array(enc.tobytes())
@@ -59,6 +60,6 @@ def process_video(video_path):
     file.close()
     writer.release()
     cap.release()
-    alpr.unload()
+    #alpr.unload()
 
     return found
