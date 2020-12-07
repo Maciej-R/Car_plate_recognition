@@ -71,7 +71,7 @@ class Intermediary:
     def signal_done():
         pattern = re.compile("/\w*\..*$") # Filename
         res = pattern.search(Intermediary.pth).group(0)
-        Intermediary.gui.signal_done(getcwd() + "/output" + re.sub("\.*$", ".avi", res))
+        Intermediary.gui.signal_done(getcwd() + "/output" + re.sub("\..*$", ".avi", res))
 
 
 class CallbackThread(Thread):
