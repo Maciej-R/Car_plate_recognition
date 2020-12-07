@@ -30,7 +30,7 @@ class Alpr():
         config_file = _convert_to_charp(config_file)
         runtime_dir = _convert_to_charp(runtime_dir)
         try:
-            self._openalprpy_lib = ctypes.cdll.LoadLibrary("../openalpr/openalprpy.dll")
+            self._openalprpy_lib = ctypes.cdll.LoadLibrary("openalpr/openalprpy.dll")
         except OSError as exception:
             nex = OSError("Unable to locate the OpenALPR library. Please make sure that"\
                 "OpenALPR is properly installed on your system and that the libraries are"\

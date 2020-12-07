@@ -1,6 +1,7 @@
 import sys
 import numpy as np
 import cv2
+import os
 from source.openalpr import Alpr
 
 def generate_mask(width,height):
@@ -9,6 +10,7 @@ def generate_mask(width,height):
     cv2.imwrite('mask.jpg', mask)
 
 def process_video(video_path):
+    filename = os.path.basename(video_path).split(sep='.')[0]
     cap = cv2.VideoCapture(video_path)
     if not cap.isOpened():
         sys.exit('Failed to open video file!')
@@ -16,12 +18,12 @@ def process_video(video_path):
     generate_mask(int(cap.get(cv2.CAP_PROP_FRAME_WIDTH)),
         int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT)))
 
-    writer = cv2.VideoWriter("../output/video3.avi",
+    writer = cv2.VideoWriter(f"output/{filename}.avi",
         cv2.VideoWriter_fourcc(*"MJPG"), cap.get(cv2.CAP_PROP_FPS),
         (int(cap.get(cv2.CAP_PROP_FRAME_WIDTH)),int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))))
 
-    alpr = Alpr("eu", "openalpr.conf",
-        "../openalpr/runtime_data")
+    alpr = Alpr("eu", "source/openalpr.conf",
+        "openalpr/runtime_data")
     if not alpr.is_loaded():
         print('Error loading OpenALPR')
         sys.exit(1)
@@ -29,7 +31,7 @@ def process_video(video_path):
     alpr.set_top_n(1)
     alpr.set_default_region('pl')
 
-    file = open('../output/report.txt','w')
+    file = open(f'output/{filename}.txt','w')
 
     cnt = 0
     found = set()
@@ -56,12 +58,7 @@ def process_video(video_path):
 
     file.close()
     writer.release()
-    cv2.destroyAllWindows()
     cap.release()
     alpr.unload()
 
     return found
-
-
-if __name__ == "__main__":
-    process_video('../video/video1.mp4')

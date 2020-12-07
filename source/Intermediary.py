@@ -55,7 +55,8 @@ class Intermediary:
         :type pth: str
         :return: None
         """
-        Thread(target=process_video, args=(pth,)).start()
+        found = process_video(pth)
+        print(found)
         Intermediary.started = True
 
     @staticmethod
@@ -66,9 +67,7 @@ class Intermediary:
         """
 
         if Intermediary.started:
-            if Intermediary.processor.is_alive():
-                return False
-            with open("../output/report.txt", "r") as f:
+            with open("output/report.txt", "r") as f:
                 Intermediary.report = f.read()
             Intermediary.gui.report = Intermediary.report
             return True
