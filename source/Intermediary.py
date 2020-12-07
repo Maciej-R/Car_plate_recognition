@@ -3,6 +3,7 @@ from PyQt5.QtCore import pyqtSlot
 from source.UI import UI
 from source.SignalWrapper import *
 from source.plates import process_video
+from threading import Thread
 
 
 class Intermediary:
@@ -45,12 +46,6 @@ class Intermediary:
     # Section of handlers for GUI events
     # Name format handle_<event>
 
-    def handle_xxx(self):
-        """
-
-        :return:
-        """
-
     @staticmethod
     def handle_file_loaded(pth:str):
         """
@@ -59,7 +54,7 @@ class Intermediary:
         :type pth: str
         :return: None
         """
-        process_video(pth)
+        Thread(target=process_video, args=(pth,)).start()
 
     @staticmethod
     def handle_get_report():
