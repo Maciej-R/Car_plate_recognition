@@ -1,7 +1,7 @@
 import sys
 import numpy as np
 import cv2
-from openalpr import Alpr
+from source.openalpr import Alpr
 
 def generate_mask(width,height):
     mask = np.zeros([height, width, 3], dtype=np.uint8)

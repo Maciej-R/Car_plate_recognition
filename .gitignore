@@ -4,3 +4,5 @@ __pycache__
 source/test.py
 source/mediaplayer.py
 source/MainWindow.py
+source/MainWindow2.py
+source/test_ui.py

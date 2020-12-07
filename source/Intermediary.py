@@ -2,6 +2,8 @@ from PyQt5.QtWidgets import QFileDialog
 from PyQt5.QtCore import pyqtSlot
 from source.UI import UI
 from source.SignalWrapper import *
+from source.plates import process_video
+from threading import Thread
 
 
 class Intermediary:
@@ -17,7 +19,14 @@ class Intermediary:
         Prepares required resources
         :arg gui: Reference to UI class that allows to send updates, interact with UI
         """
+
+        Intermediary.gui = gui
+
         gui.set_file_loaded_hanlder(Intermediary.handle_file_loaded)
+        gui.set_get_report_handler(Intermediary.handle_get_report)
+
+        Intermediary.report = "Not ready"
+        Intermediary.started = False
 
     def get_log_data(self, data):
         """
@@ -38,12 +47,6 @@ class Intermediary:
     # Section of handlers for GUI events
     # Name format handle_<event>
 
-    def handle_xxx(self):
-        """
-
-        :return:
-        """
-
     @staticmethod
     def handle_file_loaded(pth:str):
         """
@@ -52,15 +55,21 @@ class Intermediary:
         :type pth: str
         :return: None
         """
-        print("in")
+        Thread(target=process_video, args=(pth,)).start()
+        Intermediary.started = True
 
-        # dlg = QFileDialog()
-        # dlg.setFileMode(QFileDialog.AnyFile)
-        # dlg.setNameFilters(["Movies (*.mp4)"])
-        # dlg.selectNameFilter("Movies (*.mp4)")
-        #
-        # filenames = str()
-        #
-        # if dlg.exec_():
-        #     filenames = dlg.selectedFiles()
+    @staticmethod
+    def handle_get_report():
+        """
+        Provides report to UI
+        :return: True if report has been updated, False otherwise
+        """
 
+        if Intermediary.started:
+            if Intermediary.processor.is_alive():
+                return False
+            with open("../output/report.txt", "r") as f:
+                Intermediary.report = f.read()
+            Intermediary.gui.report = Intermediary.report
+            return True
+        return False

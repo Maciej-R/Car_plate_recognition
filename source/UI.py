@@ -1,9 +1,11 @@
-from PyQt5 import QtWidgets
+from PyQt5 import QtWidgets, QtCore
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 from PyQt5.QtMultimedia import *
-from source.MainWindow2 import UI_MainWindow
+from source.MainWindow3 import UI_MainWindow
+from source.ReportWindow import ReportWindow
+import re
 
 
 class UI(QtWidgets.QMainWindow, UI_MainWindow):
@@ -17,63 +19,37 @@ class UI(QtWidgets.QMainWindow, UI_MainWindow):
 
     def __init__(self, *args, **kwargs) -> None:
         """
-        Loads required data and configuration for GUI, binds appropriate listeners from Intermediary class to GUI
-        elements, initializes it to be displayed.
-        :arg pth: Path to GUI definition file -- Removed for now
-        :type pth: String -- Removed for now
-        :raises RuntimeError: When configuration file has wrong format
-        :raises FileNotFoundError: When provided file points to file that does not exists
-        :return: None
+        Prepares required GUI elements, sets handlers
         :return: None
         """
         super(UI, self).__init__(*args, **kwargs)
         self.setupUi(self)
 
+        # Create invisible window where report will be shown
+        self.report_window = ReportWindow()
+
+        # Needed for video playback
         self.player = QMediaPlayer()
-
-        self.player.error.connect(self.erroralert)
-        self.player.play()
-
-        # Setup the playlist.
-        self.playlist = QMediaPlaylist()
-        self.player.setPlaylist(self.playlist)
-
-        # Add viewer for video playback, separate floating window.
-        self.viewer = ViewerWindow(self)
-        self.viewer.setWindowFlags(self.viewer.windowFlags() | Qt.WindowStaysOnTopHint)
-        self.viewer.setMinimumSize(QSize(480,360))
-
+        self.player.error.connect(self.log_error)
+        self.player.pause()
         self.player.setVideoOutput(self.videoWidget)
 
-        # Connect control buttons/slides for media player.
-        self.playButton.pressed.connect(self.player.play)
-        self.pauseButton.pressed.connect(self.player.pause)
-        self.stopButton.pressed.connect(self.player.stop)
-        self.volumeSlider.valueChanged.connect(self.player.setVolume)
-
-        # self.viewButton.toggled.connect(self.toggle_viewer)
-        # self.viewer.state.connect(self.viewButton.setChecked)
-
-        self.previousButton.pressed.connect(self.playlist.previous)
-        self.nextButton.pressed.connect(self.playlist.next)
-
-        # self.model = PlaylistModel(self.playlist)
-        # self.playlistView.setModel(self.model)
-        # self.playlist.currentIndexChanged.connect(self.playlist_position_changed)
-        # selection_model = self.playlistView.selectionModel()
-        # selection_model.selectionChanged.connect(self.playlist_selection_changed)
-
-        self.player.durationChanged.connect(self.update_duration)
-        self.player.positionChanged.connect(self.update_position)
-        self.timeSlider.valueChanged.connect(self.player.setPosition)
-
-        self.open_file_action.triggered.connect(self.open_file)
-
+        # To accept and load video dropped into GUI
         self.setAcceptDrops(True)
 
+        # Set listeners
         self.add_listeners()
 
+        # Handlers will be added by Intermediary
         self.file_loaded_handler = None
+        self.get_report_hanlder = None
+
+        # Current report to display
+        self.report = None
+
+        # For list view with found plates
+        self.model = QStandardItemModel()
+        self.listView.setModel(self.model)
 
     def add_listeners(self) -> None:
         """
@@ -81,61 +57,106 @@ class UI(QtWidgets.QMainWindow, UI_MainWindow):
         :raises NotImplementedError: When function attempts to bind GUI element's listener to nonexistent function
         :return: None
         """
-        self.pushButton_4.clicked.connect(self.open_file)
+        self.BLoad.clicked.connect(self.load_file)
+        self.BOpen.clicked.connect(self.open_file)
+        self.BReport.clicked.connect(self.show_report)
+        self.report_window.save_file_action.triggered.connect(self.save_file)
 
-    def results_ready_notify(self):
-        """
-        Display information about completed process to user and allow him to open output file in player
-        :return:
-        """
+        # Connect control buttons/slides for media player.
+        self.playButton.pressed.connect(self.player.play)
+        self.pauseButton.pressed.connect(self.player.pause)
+        self.stopButton.pressed.connect(self.player.stop)
+        self.volumeSlider.valueChanged.connect(self.player.setVolume)
+
+        self.player.durationChanged.connect(self.update_duration)
+        self.player.positionChanged.connect(self.update_position)
+        self.timeSlider.valueChanged.connect(self.player.setPosition)
 
     def dragEnterEvent(self, e):
         if e.mimeData().hasUrls():
             e.acceptProposedAction()
 
     def dropEvent(self, e):
+        """Handles drop action - loads video to player and pass path to file to backend"""
+
+        # Stop current recording
+        self.player.pause()
+
+        # Get file to new video and load it
         for url in e.mimeData().urls():
-            self.playlist.addMedia(
-                QMediaContent(url)
-            )
-
-        self.model.layoutChanged.emit()
-
-        # If not playing, seeking to first of newly added + play.
-        if self.player.state() != QMediaPlayer.PlayingState:
-            i = self.playlist.mediaCount() - len(e.mimeData().urls())
-            self.playlist.setCurrentIndex(i)
-            self.player.play()
-
-    def open_file(self):
-
-        dlg = QFileDialog()
-        dlg.setFileMode(QFileDialog.AnyFile)
-        dlg.setNameFilters(["Movies (*.avi)"])
-        dlg.selectNameFilter("Movies (*.avi)")
-
-        path = None
-
-        if dlg.exec_():
-            path = dlg.selectedFiles()
-
-        print(path)
-
-        if path:
-            path = path[0]
-            self.playlist.addMedia(QMediaContent(QUrl.fromLocalFile(path)))
-            self.player.setMedia(QMediaContent(QUrl.fromLocalFile(path)))
-            print(self.file_loaded_handler)
             try:
-                self.file_loaded_handler(path)
+                if re.search(".*\.avi", url.toLocalFile()):
+                    self.player.setMedia(QMediaContent(url))
+                self.file_loaded_handler(url.toLocalFile())
             except Exception as e:
                 print(e)
 
-        # self.model.layoutChanged.emit()
+        # Show new video
+        self.player.pause()
+        self.LInfo.setText("File loaded")
+
+        if self.player.state() != QMediaPlayer.PlayingState:
+            pass
+
+    def load_file(self):
+        """Show file choosing dialog, if user had chosen file than get path and call appropriate handler"""
+
+        path = self.show_file_choose_dialog("")
+
+        # Process choice, if one was made
+        if path:
+            path = path[0]
+            try:
+                self.file_loaded_handler(path)
+                self.LInfo.setText("File loaded")
+                self.clear_list_view()
+            except Exception as e:
+                print(e)
+
+    def open_file(self):
+        """Shows file choosing dialog and loads chosen file to player"""
+
+        path = self.show_file_choose_dialog("Movies (*.avi)")
+
+        if path:
+            path = path[0]
+            self.player.setMedia(QMediaContent(QUrl.fromLocalFile(path)))
+            # Show first frame
+            self.player.pause()
+
+    def save_file(self):
+        """Opens dialog to choose saved file's name and saves report to given location"""
+
+        name = QFileDialog.getSaveFileName(self, 'Save File')
+        if name is None:
+            return
+
+        with open(name[0], 'w') as f:
+            f.write(self.report)
+
+    def show_file_choose_dialog(self, filter):
+        """
+        Shows dialog to choose files
+        :arg filter: Filter to set up, will allow only specified files
+        :return: str - Path to chosen file
+        """
+
+        # Set up dialog parameters
+        dlg = QFileDialog()
+        dlg.setFileMode(QFileDialog.AnyFile)
+        dlg.setNameFilters([filter])
+        dlg.selectNameFilter(filter)
+
+        path = None
+
+        # Show dialog and get path
+        if dlg.exec_():
+            path = dlg.selectedFiles()
+
+        return path
 
     def update_duration(self, duration):
-        print("!", duration)
-        print("?", self.player.duration())
+        """After loading file update displayed length info and scale slider"""
 
         self.timeSlider.setMaximum(duration)
 
@@ -143,6 +164,8 @@ class UI(QtWidgets.QMainWindow, UI_MainWindow):
             self.totalTimeLabel.setText(hhmmss(duration))
 
     def update_position(self, position):
+        """Updates time displayed on slider as time passes"""
+
         if position >= 0:
             self.currentTimeLabel.setText(hhmmss(position))
 
@@ -151,39 +174,75 @@ class UI(QtWidgets.QMainWindow, UI_MainWindow):
         self.timeSlider.setValue(position)
         self.timeSlider.blockSignals(False)
 
-    def playlist_selection_changed(self, ix):
-        # We receive a QItemSelection from selectionChanged.
-        i = ix.indexes()[0].row()
-        self.playlist.setCurrentIndex(i)
+    def log_error(self, *args):
+        """Log player errors to console"""
 
-    def playlist_position_changed(self, i):
-        if i > -1:
-            ix = self.model.index(i)
-            self.playlistView.setCurrentIndex(ix)
+        print("Player error: " + args)
 
-    def toggle_viewer(self, state):
-        if state:
-            self.viewer.show()
-        else:
-            self.viewer.hide()
+    def signal_done(self, pth:str=None):
+        """
+        Display information about completed process to user [and open output file in player]
+        :arg pth: Path to output video (optional), if present video will be loaded into player
+        """
 
-    def erroralert(self, *args):
-        print("Error")
-        print(args)
+        if pth:
+            self.player.setMedia(QMediaContent(QUrl.fromLocalFile(pth)))
+            # Shows first frame so that change will be noticeable
+            self.player.pause()
+
+        self.LInfo.setText("Processing finished")
+
+    def show_report(self):
+        """Open new window with report or updates text in existing one"""
+
+        # Show window
+        if not self.report_window.isVisible():
+            self.report_window.show()
+
+        # Update text if needed
+        if self.get_report_hanlder():
+            self.report_window.TextReport.setText(self.report)
+
+    def add_recognized_plate(self, plate:str):
+        """
+        Adds recognized license plate to list view in the GUI
+        :param plate: String to be added
+        :type plate: str
+        :return: None
+        """
+
+        item = QStandardItem(plate)
+        self.model.appendRow(item)
+
+    def clear_list_view(self):
+        """Clears list view display"""
+
+        self.model.clear()
+
+#----------------------- Functions for setting up handlers ----------------------------
+# All with the same functionality - allows Intermediary to call them in order to bind appropriate functions
+# from within itself to certain events
 
     def set_file_loaded_hanlder(self, mthd):
 
         self.file_loaded_handler = mthd
 
+    def set_get_report_handler(self, mthd):
+
+        self.get_report_hanlder = mthd
+
 
 def hhmmss(ms):
-    # s = 1000
-    # m = 60000
-    # h = 360000
+    """Convert time from ms to hours, minutes, seconds"""
+
     h, r = divmod(ms, 36000)
     m, r = divmod(r, 60000)
     s, _ = divmod(r, 1000)
-    return ("%d:%02d:%02d" % (h,m,s)) if h else ("%d:%02d" % (m,s))
+
+    if h:
+        return "%d:%02d:%02d" % (h, m, s)
+    else:
+        return "%d:%02d" % (m, s)
 
 
 class ViewerWindow(QMainWindow):
@@ -192,18 +251,3 @@ class ViewerWindow(QMainWindow):
     def closeEvent(self, e):
         # Emit the window state, to update the viewer toggle button.
         self.state.emit(False)
-
-
-class PlaylistModel(QAbstractListModel):
-
-    def __init__(self, playlist, *args, **kwargs):
-        super(PlaylistModel, self).__init__(*args, **kwargs)
-        self.playlist = playlist
-
-    def data(self, index, role):
-        if role == Qt.DisplayRole:
-            media = self.playlist.media(index.row())
-            return media.canonicalUrl().fileName()
-
-    def rowCount(self, index):
-        return self.playlist.mediaCount()
