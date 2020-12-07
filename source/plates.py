@@ -1,5 +1,4 @@
 import sys
-import time
 import numpy as np
 import cv2
 from openalpr import Alpr
@@ -10,8 +9,6 @@ def generate_mask(width,height):
     cv2.imwrite('mask.jpg', mask)
 
 def process_video(video_path):
-    start = time.time() # START
-
     cap = cv2.VideoCapture(video_path)
     if not cap.isOpened():
         sys.exit('Failed to open video file!')
@@ -35,6 +32,8 @@ def process_video(video_path):
     file = open('../output/report.txt','w')
 
     cnt = 0
+    found = set()
+
     while cap.isOpened():
         ret_val, frame = cap.read()
         if not ret_val:
@@ -49,22 +48,20 @@ def process_video(video_path):
         if results['results']:
             for plate in results['results']:
                 file.write('Frame: {:5} | Plate: {:8}\n'.format(cnt, plate['plate']))
+                found.add(plate['plate'])
                 cv2.rectangle(frame, (plate["coordinates"][0]["x"],plate["coordinates"][0]["y"]),
                     (plate["coordinates"][2]["x"],plate["coordinates"][2]["y"]), (0,255,0), 3)
 
         writer.write(frame)
-        cv2.imshow('openalpr', frame)
-
-        if cv2.waitKey(1) == 27:
-            break
 
     file.close()
     writer.release()
     cv2.destroyAllWindows()
     cap.release()
     alpr.unload()
-    print(time.time()- start)   # STOP
+
+    return found
 
 
 if __name__ == "__main__":
-    process_video('../video/video3.mp4')
+    process_video('../video/video1.mp4')
