@@ -6,12 +6,14 @@ import cv2
 
 from source.openalpr import Alpr
 
-def generate_mask(width,height):
+
+def generate_mask(width, height):
     mask = np.zeros([height, width, 3], dtype=np.uint8)
     mask[height//2:,:] = [255, 255, 255]
     cv2.imwrite('mask.jpg', mask)
 
-def process_video(video_path, found):
+
+def process_video(video_path, found, processing_info):
     """
     Function for detecting license plates from video
     :video_path: path to input video
@@ -48,6 +50,8 @@ def process_video(video_path, found):
             break
 
         cnt += 1
+        # Signal processing progress
+        processing_info(cnt)
 
         _, enc = cv2.imencode("*.jpg", frame)
         results = alpr.recognize_array(enc.tobytes())

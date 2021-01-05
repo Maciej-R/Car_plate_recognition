@@ -46,7 +46,7 @@ class Intermediary:
         Intermediary.pth = pth
         Intermediary.found = set()
         Intermediary.processor = CallbackThread(Intermediary.signal_done, target=process_video,
-                                                args=(pth, Intermediary.found))
+                                                args=(pth, Intermediary.found, Intermediary.handle_progress))
         Intermediary.processor.start()
         Intermediary.started = True
 
@@ -69,11 +69,22 @@ class Intermediary:
 
     @staticmethod
     def signal_done():
+        """Finishes file processing, displays necessary info, forwards signal to load output file"""
+        # Get filename by regex
         pattern = re.compile("/\w*\..*$") # Filename
         res = pattern.search(Intermediary.pth).group(0)
+        # Forward signal to GUI with created output path
         Intermediary.gui.signal_done(getcwd() + "/output" + re.sub("\..*$", ".avi", res))
+        # Add recognized plates to GUI
         for plate in Intermediary.found:
             Intermediary.gui.add_recognized_plate(plate)
+
+    @staticmethod
+    def handle_progress(frame):
+        """Display number of frame that is being processed"""
+
+        Intermediary.gui.LInfo.setText("Processing frame #" + str(frame))
+
 
 
 class CallbackThread(Thread):
