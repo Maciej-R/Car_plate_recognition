@@ -15,7 +15,7 @@ def process_video(video_path, found):
     """
     Function for detecting license plates from video
     :video_path: path to input video
-    :return: dictionary, key=license plate number, value=license plate image
+    :found: set which will be filled with unique license plate numbers
     """
     filename = os.path.basename(video_path).split(sep='.')[0]
     cap = cv2.VideoCapture(video_path)
@@ -55,9 +55,7 @@ def process_video(video_path, found):
         if results['results']:
             for plate in results['results']:
                 file.write('Frame: {:5} | Plate: {:8}\n'.format(cnt, plate['plate']))
-                if plate['plate'] not in found:
-                    found[plate['plate']] = frame.copy()[plate["coordinates"][0]["y"]:plate["coordinates"][2]["y"],
-                        plate["coordinates"][0]["x"]:plate["coordinates"][2]["x"]]
+                found.add(plate['plate'])
                 cv2.rectangle(frame, (plate["coordinates"][0]["x"],plate["coordinates"][0]["y"]),
                     (plate["coordinates"][2]["x"],plate["coordinates"][2]["y"]), (0,255,0), 3)
 
@@ -67,5 +65,3 @@ def process_video(video_path, found):
     file.close()
     writer.release()
     cap.release()
-
-    return found

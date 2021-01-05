@@ -44,7 +44,7 @@ class Intermediary:
         :return: None
         """
         Intermediary.pth = pth
-        Intermediary.found = {}
+        Intermediary.found = set()
         Intermediary.processor = CallbackThread(Intermediary.signal_done, target=process_video,
                                                 args=(pth, Intermediary.found))
         Intermediary.processor.start()
@@ -72,7 +72,7 @@ class Intermediary:
         pattern = re.compile("/\w*\..*$") # Filename
         res = pattern.search(Intermediary.pth).group(0)
         Intermediary.gui.signal_done(getcwd() + "/output" + re.sub("\..*$", ".avi", res))
-        for plate in Intermediary.found.keys():
+        for plate in Intermediary.found:
             Intermediary.gui.add_recognized_plate(plate)
 
 
