@@ -85,9 +85,27 @@ class UI(QtWidgets.QMainWindow, UI_MainWindow):
         # Get file to new video and load it
         for url in e.mimeData().urls():
             try:
-                if re.search(".*\.avi", url.toLocalFile()):
+                lf = url.toLocalFile()
+                if re.search(".*\.avi", lf):
                     self.player.setMedia(QMediaContent(url))
-                self.file_loaded_handler(url.toLocalFile())
+                extensions = ["mp4", "avi", "mov", "mpeg", "flv", "wmv"]
+                proper_ex = False
+                # Check if file has got proper extension
+                for ex in extensions:
+                    if re.search(".*\." + ex, lf):
+                        self.file_loaded_handler(lf)
+                        proper_ex = True
+                # Show dialog about wrong format
+                print(proper_ex)
+                if not proper_ex:
+                    msg = QMessageBox()
+                    msg.setIcon(QMessageBox.Information)
+                    msg.setText("Cannot load file")
+                    msg.setInformativeText("Wrong file format")
+                    msg.setWindowTitle("Error info")
+                    msg.setStandardButtons(QMessageBox.Ok)
+                    msg.exec_()
+                    return
             except Exception as e:
                 print(e)
 
@@ -101,7 +119,7 @@ class UI(QtWidgets.QMainWindow, UI_MainWindow):
     def load_file(self):
         """Show file choosing dialog, if user had chosen file than get path and call appropriate handler"""
 
-        path = self.show_file_choose_dialog("")
+        path = self.show_file_choose_dialog("Movies (*.mp4 *.avi *.mov *.mpeg *.flv *.wmv)")
 
         # Process choice, if one was made
         if path:
