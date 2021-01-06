@@ -5,7 +5,12 @@ from source.UI import UI
 from PyQt5.QtGui import *
 from PyQt5.QtCore import *
 from source.Intermediary import Intermediary
+from os import environ
 
+environ["QT_DEVICE_PIXEL_RATIO"] = "0"
+environ["QT_AUTO_SCREEN_SCALE_FACTOR"] = "1"
+environ["QT_SCREEN_SCALE_FACTORS"] = "1"
+environ["QT_SCALE_FACTOR"] = "1"
 
 #app = QtWidgets.QApplication(sys.argv)
 app = QApplication(sys.argv)
